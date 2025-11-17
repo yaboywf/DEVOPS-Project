@@ -54,6 +54,8 @@ const getAllStudents = async (req, res) => {
 // Get rankings sorted by rating type
 const getRankings = async (req, res) => {
     try {
+        // Uncomment the following line to test error handling
+        // throw new Error('Test error');
         const { sortBy = 'rapid' } = req.query;
 
         // Validation: Check if sortBy is valid
