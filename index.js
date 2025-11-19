@@ -17,7 +17,6 @@ app.use(express.static('public'));
 app.post('/api/students', CreateStudentUtil.createStudent);
 
 // ===== Dylan - READ API Endpoints =====
-app.get('/api/students', ViewRankingsUtil.getAllStudents);
 app.get('/api/rankings', ViewRankingsUtil.getRankings);
 
 // ===== Danish- DELETE API Endpoints =====
