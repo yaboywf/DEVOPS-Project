@@ -1,9 +1,6 @@
 #!/bin/sh
 # Tells the computer to run this script using the sh shell.
 
-# Load husky environment
-. "$(dirname "$0")/_/husky.sh"
-
 # Fetch the latest main branch silently
 git fetch origin main >/dev/null 2>&1
 
