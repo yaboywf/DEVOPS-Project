@@ -29,12 +29,18 @@ app.put('/api/students/:id', UpdateStudentUtil.updateScores);
 app.delete('/api/students/:id', DeleteAccountUtil.deleteStudent);
 
 // Serve main page
+/* istanbul ignore next */
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start server
-app.listen(PORT, () => {
+/* istanbul ignore next */
+if (require.main === module) {
+  app.listen(PORT, () => {
     console.log(`Chess Club Ranking System running on http://localhost:${PORT}`);
     console.log(`Server started at ${new Date().toLocaleString()}`);
-});
+  });
+}
+
+module.exports = app;
