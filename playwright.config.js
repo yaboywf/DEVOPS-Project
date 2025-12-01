@@ -5,7 +5,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 8,
   reporter: 'html',
   use: {
     trace: 'on-first-retry',
@@ -13,32 +13,32 @@ export default defineConfig({
     // headless: false,
   },
 
-  /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: devices['Desktop Chrome'],
+      workers: 7
     },
-
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: devices['Desktop Firefox'],
+      workers: 1
     },
-
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: devices['Desktop Safari'],
+      workers: 7
     },
-
-    /* Test against mobile viewports. */
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      use: devices['Pixel 5'],
+      workers: 7
     },
     {
       name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    },
+      use: devices['iPhone 12'],
+      workers: 7
+    }
   ],
 
   webServer: {

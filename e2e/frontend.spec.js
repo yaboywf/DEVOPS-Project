@@ -5,32 +5,49 @@ const BASE_URL = 'http://localhost:5000';
 
 test.use({
   launchOptions: {
-    slowMo: 100  // small delay fixes many FF timing issues
+    slowMo: 100
   },
 });
 
+test.beforeEach(async ({ page }) => {
+  page.on("pageerror", err => console.log("PAGE ERROR:", err.message));
+});
+
+const navigateToViewTab = async ({ page }) => {
+  // Navigate to view section
+  await page.goto(BASE_URL, { waitUntil: "networkidle" });
+  await page.click('button[onclick="showSection(\'view\')"]');
+
+  // Verify rankings section is visible
+  const section = page.locator("#view-section");
+  await expect(section).toBeVisible();
+
+  return section;
+};
+
+const simulateApiError = async ({ page, status = 200, message = "", error = "" }) => {
+  await page.route("**/api/rankings**", async (route) => {
+    await route.fulfill({
+      status,
+      contentType: "application/json",
+      body: JSON.stringify({ message, error, rankings: [], success: false }),
+    });
+  });
+};
+
 test('should load page', async ({ page }) => {
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+  await page.goto(BASE_URL, { waitUntil: "networkidle" });
   await expect(page).toHaveTitle(/Chess Club Ranking System/);
 });
 
 test('should navigation to view ranking tab', async ({ page }) => {
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  const rankingSection = page.locator('#view-section');
-  await expect(rankingSection).toBeVisible();
-
-  await expect(rankingSection).toContainText('Chess Rankings');
-  await expect(rankingSection.locator('table')).toBeVisible();
+  const section = await navigateToViewTab({ page });
+  await expect(section).toContainText('Chess Rankings');
+  await expect(section.locator('table')).toBeVisible();
 });
 
 test("should show rankings table with default sort after successful load", async ({ page }) => {
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  const section = page.locator("#view-section");
-  await expect(section).toBeVisible();
+  const section = await navigateToViewTab({ page });
 
   await page.waitForSelector("td.loading", { state: "detached", timeout: 10000 });
   await page.waitForSelector('body[data-loaded="done"]');
@@ -43,17 +60,10 @@ test("should show rankings table with default sort after successful load", async
   for (let i = 0; i < count; i++) {
     await expect(rows.nth(i).locator("td").nth(2)).toHaveClass(/sorted-column/);
   }
-
-  await page.waitForTimeout(5500);
-  await expect(section.locator("#view-message")).toHaveCSS('display', 'none');
 });
 
 test('should show ranking table with explict rapid sort', async ({ page }) => {
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  const section = page.locator("#view-section");
-  await expect(section).toBeVisible();
+  const section = await navigateToViewTab({ page });
 
   await page.waitForSelector("td.loading", { state: "detached", timeout: 10000 });
   await page.waitForSelector('body[data-loaded="done"]');
@@ -69,13 +79,7 @@ test('should show ranking table with explict rapid sort', async ({ page }) => {
 })
 
 test('should show ranking table with explict blitz sort', async ({ page }) => {
-  // Navigate to view section
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  // Verify rankings section is visible
-  const section = page.locator("#view-section");
-  await expect(section).toBeVisible();
+  const section = await navigateToViewTab({ page });
 
   // Change sort option to blitz
   await page.selectOption('#sort-by', 'blitz');
@@ -96,13 +100,7 @@ test('should show ranking table with explict blitz sort', async ({ page }) => {
 })
 
 test('should show ranking table with explict bullet sort', async ({ page }) => {
-  // Navigate to view section
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  // Verify rankings section is visible
-  const section = page.locator("#view-section");
-  await expect(section).toBeVisible();
+  const section = await navigateToViewTab({ page });
 
   // Change sort option to bullet
   await page.selectOption('#sort-by', 'bullet');
@@ -123,13 +121,7 @@ test('should show ranking table with explict bullet sort', async ({ page }) => {
 })
 
 test('should show refreshed data on clicking refresh button', async ({ page }) => {
-  // Navigate to view section
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  // Verify rankings section is visible
-  const section = page.locator("#view-section");
-  await expect(section).toBeVisible();
+  const section = await navigateToViewTab({ page });
 
   // Click refresh button
   await page.click('button[onclick="loadRankings()"]');
@@ -140,13 +132,7 @@ test('should show refreshed data on clicking refresh button', async ({ page }) =
 });
 
 test('should show error message on invalid sort field', async ({ page }) => {
-  // Navigate to view section
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  // Verify rankings section is visible
-  const section = page.locator("#view-section");
-  await expect(section).toBeVisible();
+  await navigateToViewTab({ page });
 
   // Set invalid sort field
   await page.evaluate(() => {
@@ -165,21 +151,8 @@ test('should show error message on invalid sort field', async ({ page }) => {
 
 test('should show error message when no student data', async ({ page }) => {
   // Mock API response to simulate no student data
-  await page.route("**/api/rankings**", async (route) => {
-    await route.fulfill({
-      status: 404,
-      contentType: "application/json",
-      body: JSON.stringify({ message: "No students found in the database.", rankings: [], success: false }),
-    });
-  });
-
-  // Navigate to view section
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  // Verify rankings section is visible
-  const section = page.locator("#view-section");
-  await expect(section).toBeVisible();
+  await simulateApiError({ page, status: 404, message: "No students found in the database." });
+  await navigateToViewTab({ page });
 
   // Verify error message is shown
   await expect(page.locator('#rankings-body tr td')).toHaveText(/No students found. Create accounts to see rankings/i);
@@ -187,21 +160,8 @@ test('should show error message when no student data', async ({ page }) => {
 
 test('should show error message when corrupted student data is found', async ({ page }) => {
   // Mock API response to simulate corrupted student data
-  await page.route("**/api/rankings**", async (route) => {
-    await route.fulfill({
-      status: 422,
-      contentType: "application/json",
-      body: JSON.stringify({ message: "Corrupted student records found.", success: false }),
-    });
-  });
-
-  // Navigate to view section
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  // Verify rankings section is visible
-  const section = page.locator("#view-section");
-  await expect(section).toBeVisible();
+  await simulateApiError({ page, status: 422, message: "Corrupted student records found." });
+  await navigateToViewTab({ page });
 
   // Verify error message is shown
   await expect(page.locator('#rankings-body tr')).toHaveCount(0);
@@ -210,21 +170,8 @@ test('should show error message when corrupted student data is found', async ({ 
 
 test('should show error message on database read error', async ({ page }) => {
   // Mock API response to simulate server error
-  await page.route("**/api/rankings**", async (route) => {
-    await route.fulfill({
-      status: 500,
-      contentType: "application/json",
-      body: JSON.stringify({ message: "Database file not found", rankings: [], success: false }),
-    });
-  });
-
-  // Navigate to view section
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  // Verify rankings section is visible
-  const section = page.locator("#view-section");
-  await expect(section).toBeVisible();
+  await simulateApiError({ page, status: 500, message: "Database file not found" });
+  await navigateToViewTab({ page });
 
   // Verify error message is shown
   await expect(page.locator('#rankings-body tr')).toHaveCount(0);
@@ -233,21 +180,8 @@ test('should show error message on database read error', async ({ page }) => {
 
 test('should show error message on server error', async ({ page }) => {
   // Mock API response to simulate server error
-  await page.route("**/api/rankings**", async (route) => {
-    await route.fulfill({
-      status: 500,
-      contentType: "application/json",
-      body: JSON.stringify({ message: "Failed to retrieve rankings", error: "Server error", rankings: [], success: false }),
-    });
-  });
-
-  // Navigate to view section
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  // Verify rankings section is visible
-  const section = page.locator("#view-section");
-  await expect(section).toBeVisible();
+  await simulateApiError({ page, status: 500, message: "Failed to retrieve rankings", error: "Server error" });
+  await navigateToViewTab({ page });
 
   // Verify error message is shown
   await expect(page.locator('#rankings-body tr')).toHaveCount(0);
@@ -260,15 +194,76 @@ test('should show network error when rankings API fails', async ({ page }) => {
     await route.abort();
   });
 
-  // Navigate to view section
-  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-  await page.click('button[onclick="showSection(\'view\')"]');
-
-  // Verify rankings section is visible
-  const section = page.locator("#view-section");
-  await expect(section).toBeVisible();
+  const section = await navigateToViewTab({ page });
 
   // Check for the error UI
   await expect(section.locator('td')).toContainText('Failed to load rankings. Please try again.');
   await expect(section.locator('#view-message')).toHaveText(/Failed to load rankings. Please check your connection and try again./i);
+});
+
+test("should format dates correctly", async ({ page }) => {
+  const section = await navigateToViewTab({ page });
+  await page.waitForSelector("td.loading", { state: "detached" });
+
+  const dateCell = section.locator("#rankings-body tr td:last-child").first();
+  const dateText = await dateCell.textContent();
+
+  expect(dateText).toMatch(/^\d{1,2} [A-Z][a-z]{2} \d{4}$/);
+});
+
+test("should display rankings table with correct headers", async ({ page }) => {
+  const section = await navigateToViewTab({ page });
+
+  const headers = section.locator("table thead th");
+  await expect(headers.nth(0)).toHaveText("#");
+  await expect(headers.nth(1)).toHaveText("Student ID");
+  await expect(headers.nth(2)).toHaveText("Rapid");
+  await expect(headers.nth(3)).toHaveText("Blitz");
+  await expect(headers.nth(4)).toHaveText("Bullet");
+  await expect(headers.nth(5)).toHaveText("Joined");
+});
+
+test("should display sort dropdown with all options", async ({ page }) => {
+  await navigateToViewTab({ page });
+
+  const select = page.locator("#sort-by");
+
+  await expect(select).toHaveValue("rapid");
+
+  const options = await select.locator("option").allTextContents();
+  expect(options).toContain("Sort by Rapid");
+  expect(options).toContain("Sort by Blitz");
+  expect(options).toContain("Sort by Bullet");
+});
+
+test("should display rank numbers in first column", async ({ page }) => {
+  const section = await navigateToViewTab({ page });
+
+  await page.waitForSelector("td.loading", { state: "detached" });
+
+  const rows = section.locator("#rankings-body tr");
+  const count = await rows.count();
+
+  for (let i = 0; i < count; i++) {
+    await expect(rows.nth(i).locator("td").first()).toHaveText(String(i + 1));
+  }
+});
+
+test("should display success message with student count", async ({ page }) => {
+  const section = await navigateToViewTab({ page });
+
+  await page.waitForSelector("body[data-loaded='done']");
+
+  const rows = await section.locator("#rankings-body tr").count();
+  await expect(section.locator("#view-message")).toContainText(`Showing ${rows} student(s) sorted by RAPID rating`);
+});
+
+test("should auto-hide success message after 5 seconds", async ({ page }) => {
+  const section = await navigateToViewTab({ page });
+
+  await page.waitForSelector("body[data-loaded='done']");
+  await expect(section.locator("#view-message")).toBeVisible();
+
+  await page.waitForTimeout(5200);
+  await expect(section.locator("#view-message")).toHaveCSS("display", "none");
 });
