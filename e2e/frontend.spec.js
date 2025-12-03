@@ -62,7 +62,7 @@ test("should show rankings table with default sort after successful load", async
   }
 });
 
-test('should show ranking table with explict rapid sort', async ({ page }) => {
+test('should show ranking table with explicit rapid sort', async ({ page }) => {
   const section = await navigateToViewTab({ page });
 
   await page.waitForSelector("td.loading", { state: "detached", timeout: 10000 });
@@ -78,7 +78,7 @@ test('should show ranking table with explict rapid sort', async ({ page }) => {
   }
 })
 
-test('should show ranking table with explict blitz sort', async ({ page }) => {
+test('should show ranking table with explicit blitz sort', async ({ page }) => {
   const section = await navigateToViewTab({ page });
 
   // Change sort option to blitz
@@ -99,7 +99,7 @@ test('should show ranking table with explict blitz sort', async ({ page }) => {
   }
 })
 
-test('should show ranking table with explict bullet sort', async ({ page }) => {
+test('should show ranking table with explicit bullet sort', async ({ page }) => {
   const section = await navigateToViewTab({ page });
 
   // Change sort option to bullet
