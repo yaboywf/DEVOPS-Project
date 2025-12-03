@@ -5,10 +5,8 @@ const reports = require('istanbul-reports');
 const { createContext } = require('istanbul-lib-report');
 const { createCoverageMap } = require('istanbul-lib-coverage');
 
-const coverageDir = path.join(process.cwd(), 'coverage/temp'); // Playwright raw V8 coverage
-const outputDir = path.join(process.cwd(), 'coverage/frontend'); // Final HTML report output
-
-// Only include THIS file
+const coverageDir = path.join(process.cwd(), 'coverage/temp');
+const outputDir = path.join(process.cwd(), 'coverage/frontend');
 const TARGET_FILE = 'dylan.js';
 
 async function convertCoverage() {
@@ -32,7 +30,6 @@ async function convertCoverage() {
     for (const entry of v8Coverage) {
       if (!entry.url || !entry.source) continue;
 
-      // Normalize URL/path
       let pathname;
       try {
         pathname = entry.url.startsWith('http') || entry.url.startsWith('file://')
@@ -42,23 +39,19 @@ async function convertCoverage() {
         pathname = entry.url;
       }
 
-      // Fix Windows path: /C:/something → C:/something
       if (pathname.match(/^\/[A-Za-z]:/)) {
         pathname = pathname.substring(1);
       }
 
-      // Ensure only "dylan.js" is processed
       if (!pathname.endsWith(TARGET_FILE)) {
-        console.log(`Skipping (not dylan.js): ${pathname}`);
+        console.log(`Skipping: ${pathname}`);
         continue;
       }
 
-      console.log(`✔ Processing coverage for: ${pathname}`);
+      console.log(`Processing coverage for: ${pathname}`);
 
       try {
-        // Important: prefix your actual public folder if needed
         const fullPath = path.join("public", pathname);
-
         const converter = v8toIstanbul(fullPath, 0, { source: entry.source });
         await converter.load();
         converter.applyCoverage(entry.functions);
@@ -71,7 +64,7 @@ async function convertCoverage() {
   }
 
   if (!Object.keys(coverageMap.data).length) {
-    console.log('❌ No dylan.js coverage data was converted.');
+    console.log('No coverage data was converted.');
     return;
   }
 
@@ -85,7 +78,7 @@ async function convertCoverage() {
     reports.create(type).execute(context)
   );
 
-  console.log(`\n✅ Coverage report generated for "${TARGET_FILE}" in:\n   ${outputDir}\n`);
+  console.log(`\nCoverage report generated for "${TARGET_FILE}" in:\n   ${outputDir}\n`);
 }
 
 convertCoverage();

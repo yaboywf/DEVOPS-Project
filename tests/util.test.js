@@ -17,7 +17,7 @@ describe('DylanUtil - getRankings', () => {
     jest.clearAllMocks();
   });
 
-  it('should return sorted rankings by default (rapid)', async () => {
+  it('should compute rapid rankings by default', async () => {
     const mockData = {
       students: [
         { id: "2403800d", rapid: 1500, blitz: 1400, bullet: 1300, createdAt: "2025-01-04T09:30:00Z" },
@@ -43,7 +43,7 @@ describe('DylanUtil - getRankings', () => {
     });
   });
 
-  it('should return sorted rankings by rapid', async () => {
+  it('should compute rapid rankings correctly', async () => {
     const mockData = {
       students: [
         { id: "2403800d", rapid: 1500, blitz: 1400, bullet: 1300, createdAt: "2025-01-04T09:30:00Z" },
@@ -69,7 +69,7 @@ describe('DylanUtil - getRankings', () => {
     });
   });
 
-  it('should return sorted rankings by blitz', async () => {
+  it('should compute blitz rankings correctly', async () => {
     const mockData = {
       students: [
         { id: "2403800d", rapid: 1500, blitz: 1400, bullet: 1300, createdAt: "2025-01-04T09:30:00Z" },
@@ -95,7 +95,7 @@ describe('DylanUtil - getRankings', () => {
     });
   });
 
-  it('should return sorted rankings by bullet', async () => {
+  it('should compute bullet rankings correctly', async () => {
     const mockData = {
       students: [
         { id: "2403800d", rapid: 1500, blitz: 1400, bullet: 1300, createdAt: "2025-01-04T09:30:00Z" },
@@ -121,7 +121,7 @@ describe('DylanUtil - getRankings', () => {
     });
   });
 
-  it("should return 400 for invalid sort field", async () => {
+  it("should reject invalid sort field", async () => {
     fs.promises.readFile.mockResolvedValue(JSON.stringify({ students: [] }));
     const req = { query: { sortBy: "invalid" } };
     await getRankings(req, res);
@@ -133,7 +133,7 @@ describe('DylanUtil - getRankings', () => {
     }));
   });
 
-  it("should return 404 when no students", async () => {
+  it("should detect empty student dataset", async () => {
     fs.promises.readFile.mockResolvedValue(JSON.stringify({ students: [] }));
     const req = { query: {} };
     await getRankings(req, res);
@@ -146,7 +146,7 @@ describe('DylanUtil - getRankings', () => {
     }));
   });
 
-  it("should return 422 for corrupted records", async () => {
+  it("should detect corrupted records in dataset", async () => {
     const mockData = {
       students: [
         { id: "2403800d", rapid: 1500, blitz: 1400, bullet: 1300, createdAt: "2025-01-04T09:30:00Z" },
@@ -167,7 +167,7 @@ describe('DylanUtil - getRankings', () => {
     });
   });
 
-  it("should return 500 for file read error", async () => {
+  it("should handle missing database file", async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     fs.promises.readFile.mockRejectedValue({ code: "ENOENT" });
     const req = { query: {} };
@@ -181,7 +181,7 @@ describe('DylanUtil - getRankings', () => {
     });
   });
 
-  it("should return 500 for server error", async () => {
+  it("should handle unexpected server errors", async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     fs.promises.readFile.mockRejectedValue(new Error("Server error"));
     const req = { query: {} };
