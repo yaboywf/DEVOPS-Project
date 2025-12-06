@@ -27,3 +27,8 @@ coverage/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# HTML and CSS tests
+css-results.json
+html-results.json
+validation-report.html
