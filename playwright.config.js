@@ -10,6 +10,7 @@ export default defineConfig({
   use: {
     trace: 'on-first-retry',
     coverage: 'on',
+    screenshot: "only-on-failure",
     // headless: false,
   },
 
