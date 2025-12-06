@@ -68,15 +68,36 @@ async function convertCoverage() {
     return;
   }
 
-  // Create output folder
   await fs.mkdir(outputDir, { recursive: true });
-
-  // Generate HTML + LCOV reports
   const context = createContext({ dir: outputDir, coverageMap });
 
   ['html', 'lcovonly'].forEach(type =>
     reports.create(type).execute(context)
   );
+
+  const summary = coverageMap.getCoverageSummary().data;
+  const thresholds = {
+    lines: 95,
+    statements: 95,
+    functions: 95,
+    branches: 95
+  };
+
+  let belowThreshold = [];
+  for (const [metric, threshold] of Object.entries(thresholds)) {
+    const covered = summary[metric].pct;
+    if (covered < threshold) {
+      belowThreshold.push(`${metric}: ${covered}% (below ${threshold}%)`);
+    }
+  }
+
+  if (belowThreshold.length > 0) {
+    console.error('\nX Coverage threshold NOT met:');
+    belowThreshold.forEach(msg => console.error(` - ${msg}`));
+    process.exitCode = 1;
+  } else {
+    console.log('\n✓ All coverage thresholds met.');
+  }
 
   console.log(`\nCoverage report generated for "${TARGET_FILE}" in:\n   ${outputDir}\n`);
 }
