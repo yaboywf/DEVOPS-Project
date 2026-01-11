@@ -5,7 +5,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 8,
+  workers: 4,
   reporter: 'html',
   use: {
     trace: 'on-first-retry',
@@ -19,7 +19,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: devices['Desktop Chrome'],
-      workers: 7
+      workers: 4
     },
     {
       name: 'firefox',
@@ -29,17 +29,17 @@ export default defineConfig({
     {
       name: 'webkit',
       use: devices['Desktop Safari'],
-      workers: 7
+      workers: 4
     },
     {
       name: 'Mobile Chrome',
       use: devices['Pixel 5'],
-      workers: 7
+      workers: 4
     },
     {
       name: 'Mobile Safari',
       use: devices['iPhone 12'],
-      workers: 7
+      workers: 4
     }
   ],
 
