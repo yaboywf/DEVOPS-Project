@@ -1,3 +1,11 @@
+def runCmd(cmd) {
+  if (isUnix()) {
+    sh cmd
+  } else {
+    bat cmd
+  }
+}
+
 pipeline {
   agent any
 
@@ -14,37 +22,33 @@ pipeline {
     stage('Checkout') {
       steps {
         checkout scm
-        echo '✅ Checkout stage done'
       }
     }
 
     stage('Install') {
       steps {
-        sh 'npm i'
-        echo '✅ Install stage done'
+        script {
+          runCmd('npm install')
+        }
       }
     }
 
     stage('Test') {
       steps {
-        sh '''
-          set -x
-          npm test
-          npm run test-frontend
-          npm run coverage
-          echo '✅ Test stage done'
-        '''
+        script {
+          runCmd('npm run test')
+          runCmd('npm run test-frontend')
+          runCmd('npm run coverage')
+        }
       }
     }
 
     stage('Code Quality') {
       steps {
-        sh '''
-          set -x
-          npm run test-html-css
-          npm run lint
-        '''
-        echo '✅ Code Quality stage done'
+        script {
+          runCmd('npm run test-html-css')
+          runCmd('npm run lint')
+        }
       }
     }
   }
