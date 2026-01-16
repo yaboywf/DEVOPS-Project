@@ -6,6 +6,8 @@ def runCmd(cmd) {
   }
 }
 
+def IMAGE
+
 pipeline {
   agent any
 
@@ -18,6 +20,10 @@ pipeline {
     pollSCM('H/5 * * * *')
   }
 
+  environment {
+    NAME = 'chess-club-ranking'
+  }
+
   stages {
     stage('Checkout') {
       steps {
@@ -28,7 +34,7 @@ pipeline {
     stage('Install') {
       steps {
         script {
-          runCmd('npm install')
+          runCmd('npm ci')
         }
       }
     }
@@ -38,7 +44,7 @@ pipeline {
         script {
           runCmd('npm run test')
           runCmd('npm run test-frontend')
-          runCmd('npm run coverage')
+          runCmd('npm run test-frontend:coverage')
         }
       }
     }
@@ -50,6 +56,28 @@ pipeline {
           runCmd('npm run lint')
         }
       }
+    }
+
+    stage('Prepare Image Tag') {
+      steps {
+        script {
+          IMAGE = "${env.NAME}:${env.BUILD_NUMBER}"
+        }
+      }
+    }
+
+    stage('Initialize and Build Docker Image') {
+      steps {
+        script {
+          runCmd("docker build -t ${IMAGE} .")
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      archiveArtifacts artifacts: 'coverage/**', fingerprint: true
     }
   }
 }
