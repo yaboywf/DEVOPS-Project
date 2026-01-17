@@ -19,7 +19,10 @@ pipeline {
   }
 
   environment {
-    NAME = 'chess-club-ranking-system'
+    IMAGE_NAME = 'chess-club-ranking-system'
+    IMAGE_TAG  = "${BUILD_NUMBER}"
+    LOCAL_PORT = '30080'
+    SVC_PORT   = '5050'
   }
 
   stages {
@@ -58,8 +61,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         script {
-          env.IMAGE = "${env.NAME}:${env.BUILD_NUMBER}"
-          runCmd("docker build -t ${env.IMAGE} .")
+          runCmd("docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .")
         }
       }
     }
@@ -76,7 +78,7 @@ pipeline {
     stage('Load Image into Minikube') {
       steps {
         script {
-          runCmd("minikube image load ${env.IMAGE}")
+          runCmd("minikube image load ${IMAGE_NAME}:${IMAGE_TAG}")
         }
       }
     }
@@ -85,17 +87,16 @@ pipeline {
       steps {
         script {
           runCmd('kubectl apply -f deployment.yaml')
-          runCmd("kubectl set image deployment/${env.NAME} chess-club-ranking-system=${env.IMAGE}")
+          runCmd("kubectl set image deployment/${IMAGE_NAME} ${IMAGE_NAME}=${IMAGE_NAME}:${IMAGE_TAG}")
           runCmd('kubectl apply -f service.yaml')
         }
       }
     }
 
-    stage('Verify Deployment') {
+    stage('Wait for Pod Ready') {
       steps {
         script {
-          runCmd('kubectl get pods')
-          runCmd('kubectl get services')
+          runCmd("kubectl rollout status deployment/${IMAGE_NAME}")
         }
       }
     }
@@ -103,9 +104,22 @@ pipeline {
     stage('Smoke Test') {
       steps {
         script {
-          runCmd("kubectl get svc ${env.NAME}")
-          runCmd("kubectl get endpoints ${env.NAME}")
-          runCmd("powershell -Command \"Invoke-WebRequest http://127.0.0.1:30080 -UseBasicParsing\"")
+          if (isUnix()) {
+            sh """
+              kubectl port-forward svc/${IMAGE_NAME} ${LOCAL_PORT}:${SVC_PORT} &
+              PF_PID=\$!
+              sleep 5
+              curl -f http://127.0.0.1:${LOCAL_PORT}
+              kill \$PF_PID
+            """
+          } else {
+            bat """
+              start /B kubectl port-forward svc/${IMAGE_NAME} ${LOCAL_PORT}:${SVC_PORT}
+              timeout /t 5 > NUL
+              powershell -Command "Invoke-WebRequest http://127.0.0.1:${LOCAL_PORT} -UseBasicParsing"
+              taskkill /IM kubectl.exe /F
+            """
+          }
         }
       }
     }
@@ -113,8 +127,15 @@ pipeline {
 
   post {
     always {
-      echo 'Pipeline completed.'
       archiveArtifacts artifacts: 'coverage/**', fingerprint: true
+    }
+
+    success {
+      echo '✅ Pipeline completed successfully'
+    }
+
+    failure {
+      echo '❌ Pipeline failed'
     }
   }
 }
