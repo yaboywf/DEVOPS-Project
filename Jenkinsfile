@@ -85,7 +85,7 @@ pipeline {
       steps {
         script {
           runCmd('kubectl apply -f deployment.yaml')
-          runCmd("kubectl set image deployment/${env.NAME} app=${env.IMAGE}")
+          runCmd("kubectl set image deployment/${env.NAME} chess-club-ranking-system=${env.IMAGE}")
           runCmd('kubectl apply -f service.yaml')
         }
       }
