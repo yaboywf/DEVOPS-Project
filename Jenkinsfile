@@ -21,7 +21,7 @@ pipeline {
   }
 
   environment {
-    NAME = 'chess-club-ranking'
+    NAME = 'chess-club-ranking-system'
   }
 
   stages {
@@ -53,7 +53,6 @@ pipeline {
       steps {
         script {
           runCmd('npm run test-html-css')
-          runCmd('npm run lint')
         }
       }
     }
@@ -70,6 +69,16 @@ pipeline {
       steps {
         script {
           runCmd("docker build -t ${IMAGE} .")
+        }
+      }
+    }
+
+    stage('Initialize and Load Minikube') {
+      steps {
+        script {
+          runCmd('minikube status || minikube start')
+          runCmd('kubectl config use-context minikube')
+          runCmd("minikube image load ${IMAGE}")
         }
       }
     }

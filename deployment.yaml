@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chess-club-ranking-system-deploy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: chess-club-ranking-system
+  template:
+    metadata:
+      labels:
+        app: chess-club-ranking-system
+    spec:
+      containers:
+      - name: chess-club-ranking-system
+        image: chess-club-ranking-system:latest
+        ports:
+        - containerPort: 5000
