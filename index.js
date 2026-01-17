@@ -1,5 +1,7 @@
 const express = require('express');
 const path = require('path');
+const statusMonitor = require('express-status-monitor');
+const logger = require('./logger')
 
 // Import utility modules for each CRUD operation
 const CreateStudentUtil = require('./utils/DaniellaUtil');
@@ -13,6 +15,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
+app.use(statusMonitor());
 
 // ===== Daniella - CREATE API Endpoints =====
 app.post('/api/students', CreateStudentUtil.createStudent);
@@ -40,6 +43,8 @@ if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Chess Club Ranking System running on http://localhost:${PORT}`);
     console.log(`Server started at ${new Date().toLocaleString()}`);
+    logger.info(`Demo project at: ${new Date().toLocaleString()}!`);
+    logger.error(`Example of error log`)
   });
 }
 
