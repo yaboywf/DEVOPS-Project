@@ -6,8 +6,6 @@ def runCmd(cmd) {
   }
 }
 
-def IMAGE
-
 pipeline {
   agent any
 
@@ -57,28 +55,57 @@ pipeline {
       }
     }
 
-    stage('Prepare Image Tag') {
+    stage('Build Docker Image') {
       steps {
         script {
-          IMAGE = "${env.NAME}:${env.BUILD_NUMBER}"
+          env.IMAGE = "${env.NAME}:${env.BUILD_NUMBER}"
+          runCmd("docker build -t ${env.IMAGE} .")
         }
       }
     }
 
-    stage('Initialize and Build Docker Image') {
+    stage('Start Minikube') {
       steps {
         script {
-          runCmd("docker build -t ${IMAGE} .")
-        }
-      }
-    }
-
-    stage('Initialize and Load Minikube') {
-      steps {
-        script {
-          runCmd('minikube status || minikube start')
+          runCmd('minikube start --ports=127.0.0.1:30080:30080')
           runCmd('kubectl config use-context minikube')
-          runCmd("minikube image load ${IMAGE}")
+        }
+      }
+    }
+
+    stage('Load Image into Minikube') {
+      steps {
+        script {
+          runCmd("minikube image load ${env.IMAGE}")
+        }
+      }
+    }
+
+    stage('Deploy to Kubernetes') {
+      steps {
+        script {
+          runCmd('kubectl apply -f deployment.yaml')
+          runCmd("kubectl set image deployment/${env.NAME} app=${env.IMAGE}")
+          runCmd('kubectl apply -f service.yaml')
+        }
+      }
+    }
+
+    stage('Verify Deployment') {
+      steps {
+        script {
+          runCmd('kubectl get pods')
+          runCmd('kubectl get services')
+        }
+      }
+    }
+
+    stage('Smoke Test') {
+      steps {
+        script {
+          runCmd("kubectl get svc ${env.NAME}")
+          runCmd("kubectl get endpoints ${env.NAME}")
+          runCmd("powershell -Command \"Invoke-WebRequest http://127.0.0.1:30080 -UseBasicParsing\"")
         }
       }
     }
@@ -86,6 +113,7 @@ pipeline {
 
   post {
     always {
+      echo 'Pipeline completed.'
       archiveArtifacts artifacts: 'coverage/**', fingerprint: true
     }
   }

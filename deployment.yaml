@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: chess-club-ranking-system-deploy
+  name: chess-club-ranking-system
 spec:
   replicas: 2
   selector:
@@ -15,5 +15,6 @@ spec:
       containers:
       - name: chess-club-ranking-system
         image: chess-club-ranking-system:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000
