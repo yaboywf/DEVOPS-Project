@@ -9,6 +9,8 @@ export default [
       "public/js/**",
       "html-css-test/**",
       "e2e/**",
+      "playwright-report/**",
+      "coverage/**",
       "generate-coverage.js",
       "generate-html-css-report.js"
     ]
