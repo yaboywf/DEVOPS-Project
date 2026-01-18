@@ -53,6 +53,7 @@ pipeline {
     stage('Code Quality') {
       steps {
         script {
+          runCmd('npm run lint')
           runCmd('npm run test-html-css')
         }
       }

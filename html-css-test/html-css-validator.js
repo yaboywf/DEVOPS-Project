@@ -16,7 +16,7 @@ const runValidators = async () => {
     formatter: "json"
   });
 
-  fs.writeFileSync("./html-css-test/css-results.json", cssResult.output);
+  fs.writeFileSync("./html-css-test/css-results.json", JSON.stringify(cssResult.results, null, 2));
 
   console.log("HTML and CSS validation completed");
 };
