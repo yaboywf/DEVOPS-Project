@@ -135,6 +135,7 @@ pipeline {
       echo "✅ Build SUCCESS after ${currentBuild.durationString}"
 
       emailext(
+        to: 'dylanyeowf@gmail.com',
         subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
         mimeType: 'text/html',
         body: """
@@ -197,6 +198,7 @@ pipeline {
       echo '❌ Pipeline failed'
 
       emailext(
+        to: 'dylanyeowf@gmail.com',
         subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
         mimeType: 'text/html',
         attachLog: true,
