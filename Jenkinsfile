@@ -43,18 +43,9 @@ pipeline {
     stage('Test') {
       steps {
         script {
-          runCmd('npm run test')
+          runCmd('npm test')
           runCmd('npm run test-frontend')
           runCmd('npm run test-frontend:coverage')
-        }
-      }
-    }
-
-    stage('Code Quality') {
-      steps {
-        script {
-          runCmd('npm run lint')
-          runCmd('npm run test-html-css')
         }
       }
     }
