@@ -62,7 +62,6 @@ pipeline {
       steps {
         script {
           runCmd('minikube start --ports=127.0.0.1:30080:30080')
-          runCmd('kubectl config use-context minikube')
         }
       }
     }
@@ -79,7 +78,6 @@ pipeline {
       steps {
         script {
           runCmd('kubectl apply -f deployment.yaml')
-          runCmd("kubectl set image deployment/${IMAGE_NAME} ${IMAGE_NAME}=${IMAGE_NAME}:${IMAGE_TAG}")
           runCmd('kubectl apply -f service.yaml')
         }
       }
@@ -98,18 +96,15 @@ pipeline {
         script {
           if (isUnix()) {
             sh """
-              kubectl port-forward svc/${IMAGE_NAME} ${LOCAL_PORT}:${SVC_PORT} &
-              PF_PID=\$!
+              kubectl port-forward svc/${IMAGE_NAME} ${LOCAL_PORT}:${SVC_PORT} >/dev/null 2>&1 &
               sleep 5
               curl -f http://127.0.0.1:${LOCAL_PORT}
-              kill \$PF_PID
             """
           } else {
             bat """
               start /B kubectl port-forward svc/${IMAGE_NAME} ${LOCAL_PORT}:${SVC_PORT}
               timeout /t 5 > NUL
               powershell -Command "Invoke-WebRequest http://127.0.0.1:${LOCAL_PORT} -UseBasicParsing"
-              taskkill /IM kubectl.exe /F
             """
           }
         }
