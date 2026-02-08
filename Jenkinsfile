@@ -83,7 +83,7 @@ pipeline {
       }
     }
 
-    stage('Wait for Pod Ready') {
+    stage('Verify Deployment') {
       steps {
         script {
           runCmd("kubectl rollout status deployment/${IMAGE_NAME}")
