@@ -60,6 +60,9 @@ pipeline {
           def hour = new Date().format('H').toInteger()
           def isNight = (hour >= 22 || hour < 6)
 
+          echo "Jenkins hour = ${hour}"
+          echo "FRONTEND_TEST_MODE = ${params.FRONTEND_TEST_MODE}"
+
           switch (params.FRONTEND_TEST_MODE) {
             case 'FULL':
               runCmd('npm run test-frontend')
