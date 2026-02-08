@@ -118,7 +118,7 @@ pipeline {
     }
 
     success {
-      echo "✅ Build SUCCESS after ${currentBuild.durationString}"
+      echo "Build SUCCESS"
 
       emailext(
         to: 'dylanyeowf@gmail.com',
@@ -181,7 +181,7 @@ pipeline {
     }
 
     failure {
-      echo '❌ Pipeline failed'
+      echo 'Pipeline failed'
 
       emailext(
         to: 'dylanyeowf@gmail.com',
