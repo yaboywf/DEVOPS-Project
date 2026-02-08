@@ -15,7 +15,7 @@ pipeline {
   }
 
   triggers {
-    pollSCM('H/5 * * * *')
+    pollSCM('H/1 * * * *')
   }
 
   environment {
@@ -140,21 +140,9 @@ pipeline {
                       <td style="padding:24px;">
                         <h2 style="margin:0 0 10px;color:#2ee59d;">Build Successful</h2>
 
-                        <p style="margin:0 0 16px;color:#d1d5ff;font-size:14px;">The Jenkins build has completed successfully.</p>
+                        <p style="margin:0 0 16px;color:#d1d5ff;font-size:14px;">The ${JOB_NAME} #${BUILD_NUMBER} Jenkins build has completed successfully.</p>
 
                         <table width="100%" cellpadding="6" cellspacing="0" style="font-size:13px;color:#e5e7ff;">
-                          <tr>
-                            <td width="140">Job Name</td>
-                            <td>${JOB_NAME}</td>
-                          </tr>
-                          <tr>
-                            <td>Build Number</td>
-                            <td>#${BUILD_NUMBER}</td>
-                          </tr>
-                          <tr>
-                            <td>Status</td>
-                            <td style="color:#2ee59d;font-weight:bold;">SUCCESS</td>
-                          </tr>
                           <tr>
                             <td>Duration</td>
                             <td>${currentBuild.durationString}</td>
@@ -206,34 +194,22 @@ pipeline {
                       <td style="padding:24px;">
                         <h2 style="margin:0 0 10px;color:#ff4d6d;">Build Failed</h2>
 
-                        <p style="margin:0 0 16px;color:#fca5a5;font-size:14px;">The Jenkins build has failed. Please review the details below.</p>
+                        <p style="margin:0 0 16px;color:#fca5a5;font-size:14px;">The ${JOB_NAME} #${BUILD_NUMBER} Jenkins build has failed</p>
 
                         <table width="100%" cellpadding="6" cellspacing="0" style="font-size:13px;color:#e5e7ff;">
                           <tr>
-                            <td width="140">Job Name</td>
-                            <td>${JOB_NAME}</td>
-                          </tr>
-                          <tr>
-                            <td>Build Number</td>
-                            <td>#${BUILD_NUMBER}</td>
-                          </tr>
-                          <tr>
-                            <td>Status</td>
-                            <td style="color:#ff4d6d;font-weight:bold;">FAILED</td>
-                          </tr>
-                          <tr>
                             <td>Duration</td>
                             <td>${currentBuild.durationString}</td>
-                          </tr>
-                          <tr>
-                            <td>Failure Cause</td>
-                            <td style="color:#fecaca;">Refer to attached log</td>
                           </tr>
                           <tr>
                             <td>Build URL</td>
                             <td>
                               <a href="${BUILD_URL}" style="color:#8b5cf6;text-decoration:none;">View Console Log</a>
                             </td>
+                          </tr>
+                          <tr>
+                            <td>Failure Cause</td>
+                            <td style="color:#fecaca;">Refer to attached log</td>
                           </tr>
                         </table>
 
