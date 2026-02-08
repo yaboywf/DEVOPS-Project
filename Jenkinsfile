@@ -61,7 +61,7 @@ pipeline {
     stage('Start Minikube') {
       steps {
         script {
-          runCmd('minikube start --ports=127.0.0.1:30080:30080')
+          runCmd('minikube status || minikube start --ports=127.0.0.1:30080:30080')
         }
       }
     }
