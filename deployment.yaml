@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: chess-club-ranking-system
-        image: chess-club-ranking-system:latest
+        image: chess-club-ranking-system:placeholder
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000

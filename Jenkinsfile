@@ -78,6 +78,7 @@ pipeline {
       steps {
         script {
           runCmd('kubectl apply -f deployment.yaml')
+          runCmd("kubectl set image deployment/chess-club-ranking-system chess-club-ranking-system=chess-club-ranking-system:${BUILD_NUMBER}")
           runCmd('kubectl apply -f service.yaml')
         }
       }
