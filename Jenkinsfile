@@ -25,6 +25,18 @@ pipeline {
     SVC_PORT   = '5050'
   }
 
+  parameters {
+    choice(
+      name: 'FRONTEND_TEST_MODE',
+      choices: [
+        'AUTO',
+        'SUBSET',
+        'FULL'
+      ],
+      description: 'Select frontend test execution mode'
+    )
+  }
+
   stages {
     stage('Checkout') {
       steps {
@@ -44,7 +56,29 @@ pipeline {
       steps {
         script {
           runCmd('npm test')
-          runCmd('npm run test-frontend')
+
+          def hour = new Date().format('H').toInteger()
+          def isNight = (hour >= 22 || hour < 6)
+
+          switch (params.FRONTEND_TEST_MODE) {
+            case 'FULL':
+              runCmd('npm run test-frontend')
+              break
+
+            case 'SUBSET':
+              runCmd('npx playwright test --project=chromium')
+              break
+
+            case 'AUTO':
+            default:
+              if (isNight) {
+                runCmd('npm run test-frontend')
+              } else {
+                runCmd('npx playwright test --project=chromium')
+              }
+              break
+          }
+
           runCmd('npm run test-frontend:coverage')
         }
       }
