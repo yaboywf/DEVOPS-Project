@@ -32,6 +32,12 @@ pipeline {
       }
     }
 
+    stage('Intentional Failure Demo') {
+      steps {
+        error('Intentional failure to test email notification')
+      }
+    }
+
     stage('Install') {
       steps {
         script {
