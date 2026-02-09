@@ -69,7 +69,7 @@ pipeline {
               break
 
             case 'SUBSET':
-              runCmd('npx playwright test --project=chromium')
+              runCmd('npm exec -- playwright test -- --project=chromium')
               break
 
             case 'AUTO':
@@ -77,7 +77,7 @@ pipeline {
               if (isNight) {
                 runCmd('npm run test-frontend')
               } else {
-                runCmd('npx playwright test --project=chromium')
+                runCmd('npm exec -- playwright test -- --project=chromium')
               }
               break
           }
