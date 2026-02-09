@@ -159,6 +159,8 @@ pipeline {
 
       emailext(
         to: 'dylanyeowf@gmail.com',
+        from: 'Dylan CI <dylanyeowf@gmail.com>',
+        credentialsId: 'gmail',
         subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
         mimeType: 'text/html',
         body: """
@@ -210,6 +212,8 @@ pipeline {
 
       emailext(
         to: 'dylanyeowf@gmail.com',
+        from: 'Dylan CI <dylanyeowf@gmail.com>',
+        credentialsId: 'gmail',
         subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
         mimeType: 'text/html',
         attachLog: true,
