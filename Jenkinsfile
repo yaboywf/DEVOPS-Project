@@ -73,7 +73,6 @@ pipeline {
               break
 
             case 'AUTO':
-            default:
               if (isNight) {
                 runCmd('npm run test-frontend')
               } else {
