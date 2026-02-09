@@ -69,11 +69,7 @@ pipeline {
               break
 
             case 'SUBSET':
-<<<<<<< Updated upstream
-              runCmd('npm exec -- playwright test -- --project=chromium')
-=======
               runCmd('npm run test-frontend-subset')
->>>>>>> Stashed changes
               break
 
             case 'AUTO':
@@ -81,11 +77,7 @@ pipeline {
               if (isNight) {
                 runCmd('npm run test-frontend')
               } else {
-<<<<<<< Updated upstream
-                runCmd('npm exec -- playwright test -- --project=chromium')
-=======
                 runCmd('npm run test-frontend-subset')
->>>>>>> Stashed changes
               }
               break
           }
