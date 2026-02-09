@@ -1,7 +1,7 @@
-FROM node:24
+FROM node:24-alpine
 WORKDIR /usr/src/app
-COPY package*.json ./
-RUN npm ci
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts
 COPY . .
 EXPOSE 5000
 CMD ["npm", "start"]
